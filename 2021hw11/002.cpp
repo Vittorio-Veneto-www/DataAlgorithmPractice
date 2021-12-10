@@ -2,10 +2,11 @@
 #include <cstdlib>
 #include <cstring>
 #include <algorithm>
+#include <cmath>
 
 int equal(double x, double y)
 {
-    if (abs(x - y) < 1e-6)
+    if (fabs(x - y) < 1e-6)
         return 1;
     else
         return 0;
