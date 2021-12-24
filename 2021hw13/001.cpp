@@ -1,0 +1,125 @@
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <algorithm>
+#include <cmath>
+
+const int MAXN = 4000 * 250;
+int wa[MAXN], wb[MAXN], wv[MAXN], Ws[MAXN]; //辅助数组
+//注意，wv和Ws的元素个数应该同时超过字符串的字符种类数和字符串的长度
+int sa[MAXN]; //sa[i]是名次为i的后缀的位置
+void BuildSA(const int *s, int sa[], int n, int m)
+{
+    int i, j, p, *pm = wa, *k2sa = wb, *t;
+    for (i = 0; i < m; i++)
+        Ws[i] = 0;
+    for (i = 0; i < n; i++)
+        Ws[pm[i] = s[i]]++;
+    for (i = 1; i < m; i++)
+        Ws[i] += Ws[i - 1];
+    for (i = n - 1; i >= 0; i--)
+        sa[--Ws[pm[i]]] = i;
+    for (j = p = 1; p < n; j <<= 1, m = p)
+    {
+        for (p = 0, i = n - j; i < n; i++)
+            k2sa[p++] = i;
+        for (i = 0; i < n; i++)
+            if (sa[i] >= j)
+                k2sa[p++] = sa[i] - j;
+        for (i = 0; i < m; i++)
+            Ws[i] = 0;
+        for (i = 0; i < n; i++)
+            Ws[wv[i] = pm[k2sa[i]]]++;
+        for (i = 1; i < m; i++)
+            Ws[i] += Ws[i - 1];
+        for (i = n - 1; i >= 0; i--)
+            sa[--Ws[wv[i]]] = k2sa[i];
+        for (t = pm, pm = k2sa, k2sa = t, pm[sa[0]] = 0, p = i = 1; i < n; i++)
+        {
+            int a = sa[i - 1], b = sa[i];
+            if (k2sa[a] == k2sa[b] && a + j < n && b + j < n && k2sa[a + j] == k2sa[b + j])
+                pm[sa[i]] = p - 1;
+            else
+                pm[sa[i]] = p++;
+        }
+    }
+    return;
+}
+
+int height[MAXN], Rank[MAXN];
+
+void BuildHeight(int *str, int n, int *sa, int *Rank)
+{
+    int i, j, k;
+    for (int i = 0; i < n; ++i) //i 是名次,n是字符串长度
+        Rank[sa[i]] = i;
+    height[0] = 0;
+    for (i = k = 0; i < n - 1; height[Rank[i++]] = k) //i是位置
+        for (k ? k-- : 0, j = sa[Rank[i] - 1];        //Rank[0]>0才不越界
+             str[i + k] == str[j + k]; k++)
+            ;
+    //k相当于是 H[i]; height[Rank[i]] =  H[i] ;
+}
+
+int a[2][MAXN], mark[4000];
+
+int main(void)
+{
+    int n;
+    scanf("%d", &n);
+    while (n)
+    {
+        char s[201];
+        int cur = 0;
+        for (int i = 0; i < n; i++)
+        {
+            scanf("%s", s);
+            for (int j = 0; s[j]; j++)
+                a[0][cur] = s[j], a[1][cur] = i, cur++;
+            a[0][cur] = i + 256, cur++;
+        }
+        a[0][cur] = 0;
+        BuildSA(a[0], sa, cur + 1, n + 257);
+        BuildHeight(a[0], cur + 1, sa, Rank);
+        int l = 0, r = 201, mid, ans1 = 0, ans2;
+        while (r > l)
+        {
+            int mark1 = 0;
+            mid = (l + r) >> 1;
+            memset(mark, 0, sizeof(mark));
+            for (int i = 0; i < cur + 1; i++)
+                if (height[i] >= mid)
+                    mark[a[1][sa[i]]] = 1;
+                else
+                {
+                    int mark2 = 1;
+                    for (int i = 0; i < n; i++)
+                        if (mark[i])
+                            mark[i] = 0;
+                        else
+                            mark2 = 0;
+                    mark[a[1][sa[i]]] = 1;
+                    if (mark2)
+                    {
+                        ans1 = mid;
+                        ans2 = sa[i - 1];
+                        mark1 = 1;
+                        break;
+                    }
+                }
+            if (mark1)
+                l = mid + 1;
+            else
+                r = mid;
+        }
+        if (ans1)
+        {
+            for (int j = 0; j < ans1; j++)
+                printf("%c", a[0][ans2 + j]);
+            printf("\n");
+        }
+        else
+            printf("IDENTITY LOST\n");
+        scanf("%d", &n);
+    }
+}
